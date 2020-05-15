@@ -2,21 +2,21 @@
 .stack 100h 
 
 .data
-input1 DB "Введите строку: $"
-input2 DB 0Ah, 0Dh, "Введите строку для поиска: $"
-input3 DB 0Ah, 0Dh, "Введите строку для замены: $"
-outputMessage DB 0Ah, 0Dh, "Строка после замены: $"
+input1 DB "Input string: $"
+input2 DB 0Ah, 0Dh, Input word to change: $"
+input3 DB 0Ah, 0Dh, "Input new word: $"
+outputMessage DB 0Ah, 0Dh, "Result string: $"
 maxLength equ 200
 str1MaxLength DB 0
-str1Length DB '$'                  ;исходная строка
+str1Length DB '$'
 str1 DB maxLength + 2 dup('$')
 
 str2MaxLength DB maxLength
-str2Length DB '$'                  ;строка для поиска
+str2Length DB '$' 
 str2 DB maxLength + 2  dup('$')
 
 str3MaxLength DB maxLength
-str3Length DB '$'                  ;строка для замены
+str3Length DB '$'  
 str3 DB maxLength + 2  dup('$')
 
 space DB ' ' 
@@ -36,7 +36,6 @@ mov str1MaxLength, maxLength;
 mov str2MaxLength, maxLength;
 mov str3MaxLength, maxLength;
 
-;Ввод строк и вывод сообщений
 lea dx, input1
 call showString
 
@@ -56,39 +55,36 @@ lea dx, str3MaxLength
 call getString
 
 xor cx, cx
-mov cl, str1MaxLength[1]       ; помещает в cx количество символов в исходной строке
+mov cl, str1MaxLength[1]
 sub cl, str2MaxLength[1]
 inc cl              
 cld                 
-lea di, str2MaxLength[2]        ; помещает в di адрес строки для поиска
-lea si, str1MaxLength[2]        ; помещает в si адрес исходной строки
+lea di, str2MaxLength[2]
+lea si, str1MaxLength[2]
 xor ax, ax
 call transform
 
-CHECK_STRING:       ; повторять уменьшенную длину кол во раз
-mov def, 0          ; обнулить счетчик разности
+CHECK_STRING:
+mov def, 0 
 call searchWord
 inc si
-add si, def         ;сдвинуть счетчик на количество вставленных символов
+add si, def
 mov dx, def
-add ins, dx         ;переместить индекс вхождения
-add str1MaxLength[1], dl    ;увеличить длину строки
+add ins, dx
+add str1MaxLength[1], dl
 inc ins
 loop CHECK_STRING
 
 call deleteSpace
 lea dx, outputMessage
 call showString
-lea dx, str1        ; вывести исходную строку
+lea dx, str1
 call showString 
 
 END:
 mov ax, 4c00h
 int 21h
 
-; **** Procedures ****
-
-; процедура ввода строки
 getString proc
     push ax
     mov ah, 0ah
@@ -97,7 +93,6 @@ getString proc
     ret
 getString endp
 
-;процедура вывода строки
 showString proc
     push ax
     mov ah, 09h
@@ -106,10 +101,6 @@ showString proc
     ret
 showString endp
 
-; процедура нахождения подстроки
-; процедура проходит по строке,
-; находит нужное, удаляет его
-; и заменяет на слово для замены
 searchWord proc
     push cx
     push di
@@ -143,8 +134,6 @@ searchWord proc
     ret
 searchWord endp
 
-; удаление подстроки из исходной строки
-; путем перемещения байт из si в di
 delete proc
     push bx
     push di
@@ -159,30 +148,29 @@ delete proc
     ret
 delete endp
 
-;процедура вставки слова в строку
 change proc
     pusha
-    push ins                            ;сохранение в стеке индекса вхождения
+    push ins                 
     lea si, str1MaxLength
     lea di, str3MaxLength
     ;len1
-    mov ch, str1MaxLength[1]                    ;определение длины строк
+    mov ch, str1MaxLength[1] 
     mov cl, str3MaxLength[1]
     xor bx, bx
     xor di, di
     Outer_Cycl:
-        mov dl, str3[di]                ;помещаем в стек очередное значение из подстроки
+        mov dl, str3[di]         
         push dx
         mov bl, ch
         mov si, bx
-        cycl:                           ;в цикле сдвигаем строку вправо до индекса вхождения
+        cycl:                   
             mov dl, str1[si-1]
             mov str1[si], dl
             dec si
             cmp ins, si
             jne cycl
         pop dx
-        mov str1[si], dl                ;вставляем символ
+        mov str1[si], dl       
         
         inc si
         inc di
@@ -192,7 +180,7 @@ change proc
         xor dx, dx
         mov dl, cl
         cmp di, dx 
-        jne Outer_Cycl                  ;пока непройдем слово полностью
+        jne Outer_Cycl      
     pop ins
     dec def    
     popa
@@ -206,7 +194,7 @@ transform PROC
     xor bx, bx
     xor di, di
     xor si, si
-    mov ch, str2MaxLength[1]                    ;определение длины строк
+    mov ch, str2MaxLength[1]                
     mov cl, str3MaxLength[1]
     mov bl, ch
     mov si, bx
