@@ -3,7 +3,7 @@
 
 .data
 input1 DB "Input string: $"
-input2 DB 0Ah, 0Dh, Input word to change: $"
+input2 DB 0Ah, 0Dh, "Input word to change: $"
 input3 DB 0Ah, 0Dh, "Input new word: $"
 outputMessage DB 0Ah, 0Dh, "Result string: $"
 maxLength equ 200
